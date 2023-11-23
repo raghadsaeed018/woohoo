@@ -33,6 +33,7 @@ def index():
     """Show portfolio of pets the user owns"""
     return render_template("index.html")
 
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
@@ -122,3 +123,26 @@ def register():
 
     else:
         return render_template("register.html")
+
+
+@app.route("/shop", methods=["GET", "POST"])
+@login_required
+def shop():
+    """Allow user to buy new pets/accessories/pet food"""
+    if request.method == "GET":
+        return render_template("shop.html")
+
+
+@app.route("/sell", methods=["GET", "POST"])
+@login_required
+def sell():
+    """Allow user to sell his owned pets and accessories"""
+    if request.method == "GET":
+        return render_template("sell.html")
+
+
+@app.route("/inventory")
+@login_required
+def inventory():
+    """Display accessories/pet food the user owns"""
+    return render_template("inventory.html")
