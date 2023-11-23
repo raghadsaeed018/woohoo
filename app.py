@@ -45,11 +45,11 @@ def login():
     if request.method == "POST":
         # Ensure username was submitted
         if not request.form.get("username"):
-            return apology("must provide username", 400)
+            return apology("Warning: Must provide username", "login.html")
 
         # Ensure password was submitted
         elif not request.form.get("password"):
-            return apology("must provide password", 400)
+            return apology("Warning: Must provide password", "login.html")
 
         # Query database for username
         rows = db.execute(
@@ -60,7 +60,7 @@ def login():
         if len(rows) != 1 or not check_password_hash(
             rows[0]["hash"], request.form.get("password")
         ):
-            return apology("invalid username and/or password", 400)
+            return apology("Warning: Invalid username and/or password", "login.html")
 
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
@@ -90,24 +90,24 @@ def register():
     if request.method == "POST":
         # Ensure username was submitted
         if not request.form.get("username"):
-            return apology("must provide username", 400)
+            return apology("Warning: Must provide username", "register.html")
 
         # Ensure password was submitted
         elif not request.form.get("password"):
-            return apology("must provide password", 400)
+            return apology("Warning: Must provide password", "register.html")
 
         # Ensure confirmation was submitted
         elif not request.form.get("confirmation"):
-            return apology("must confirm password", 400)
+            return apology("Warning: Must confirm password", "register.html")
 
         # Ensure confirmation matches password
         elif request.form.get("confirmation") != request.form.get("password"):
-            return apology("passwords dont match", 400)
+            return apology("Warning: Passwords dont match", "register.html")
 
         elif db.execute(
             "SELECT * FROM users WHERE username = ?", request.form.get("username")
         ):
-            return apology("username taken", 400)
+            return apology("Warning: Username taken", "register.html")
 
         phash = generate_password_hash(request.form.get("password"))
 

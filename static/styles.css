@@ -1,0 +1,10 @@
+.width {
+    width: 40%; /* Default width for larger screens */
+}
+
+@media (max-width: 576px) {
+    /* Adjust the width for smaller screens (up to 576px) */
+    .width {
+        width: 85%;
+    }
+}

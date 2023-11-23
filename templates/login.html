@@ -5,6 +5,12 @@
 {% endblock %}
 
 {% block main %}
+    {% if message %}
+        <div class="alert alert-danger mx-auto text-center width" role="alert">
+            {{ message }}
+        </div>
+    {% endif %}
+
     <form action="/login" method="post">
         <div class="mb-3">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="username" name="username" placeholder="Username" type="text">
