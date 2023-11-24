@@ -146,3 +146,7 @@ def sell():
 def inventory():
     """Display accessories/pet food the user owns"""
     return render_template("inventory.html")
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
