@@ -31,7 +31,8 @@ def after_request(response):
 @login_required
 def index():
     """Show portfolio of pets the user owns"""
-    return render_template("index.html")
+    cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
+    return render_template("index.html", cash=cash)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -130,7 +131,16 @@ def register():
 def shop():
     """Allow user to buy new pets/accessories/pet food"""
     if request.method == "GET":
-        return render_template("shop.html")
+        categories = [
+            {"name": "Goofball"},
+            {"name": "Elegant"},
+            {"name": "Adventurous"},
+            {"name": "Mischievous"},
+            {"name": "Noodle-brain"}
+        ]
+
+        animals = db.execute("SELECT * FROM animals")
+        return render_template("shop.html", animals=animals, categories=categories)
 
 
 @app.route("/sell", methods=["GET", "POST"])

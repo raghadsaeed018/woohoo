@@ -8,3 +8,19 @@
         width: 85%;
     }
 }
+
+.snugglez-title {
+    font-family: "Ink Free", bold;
+    font-size: 30px;
+}
+
+.snugglez {
+    font-family: "Ink Free", bold;
+    font-size: 20px;
+}
+
+.navbar {
+    background-color: #ffd480;
+    color: black;
+}
+

@@ -6,18 +6,61 @@
 
 {% block main %}
     <!-- Nav tabs -->
-    <ul class="nav nav-tabs justify-content-center">
+    <ul class="nav nav-tabs justify-content-center snugglez border-bottom border-secondary">
         <li class="nav-item">
-        <a class="nav-link active" data-bs-toggle="tab" href="#">Pets</a>
+        <a class="nav-link active" data-bs-toggle="tab" href="#pets">Pets</a>
         </li>
         <li class="nav-item">
-        <a class="nav-link" data-bs-toggle="tab" href="#">Accessories & Food</a>
+        <a class="nav-link" data-bs-toggle="tab" href="#acc&food">Accessories & Food</a>
         </li>
     </ul>
     
     <!-- Tab panes -->
-    <div class="tab-content">
-        <div class="tab-pane container active" id="home">...</div>
-        <div class="tab-pane container fade" id="menu1">...</div>
+    <div class="tab-content text-center py-5">
+        <div class="tab-pane container active" id="pets">
+            {% for category in categories %}
+                <div class="{{ category.name|lower }} mb-5">
+                    <h2 class="text-center mb-4">{{ category.name }}</h2>
+                    <div class="row row-cols-2 row-cols-md-2 row-cols-lg-4 g-3">
+                        {% for animal in animals %}
+                            {% if animal["category"] == category.name|lower %}
+                                <div class="col">
+                                    <div class="card text-bg-success mb-3">
+                                        <img src="{{ animal['image'] }}" class="card-img-top aspect-ratio-16x9" alt="Pet image">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ animal['name'] }}</h5>
+                                            <p class="card-text">{{ animal['description'] }}</p>
+                                        </div>
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item text-bg-light">Price: {{ animal['price'] }}</li>
+                                        </ul>
+                                        <div class="card-body">
+                                            <a href="#" class="btn btn-outline-light">Buy</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="tab-pane container" id="acc&food">... ruff</div>
     </div>
+
+    <script>
+        $(document).ready(function () {
+            // Hide content initially
+            $("#acc&food").hide();
+
+            // Show/hide content on tab change
+            $(".nav-link").on("click", function () {
+                $(".tab-pane").hide();
+                $($(this).attr("href")).show();
+            });
+        });
+    </script>
 {% endblock %}
+
+
