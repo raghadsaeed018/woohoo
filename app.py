@@ -1,8 +1,9 @@
 from cs50 import SQL
-from flask import Flask, flash, redirect, render_template, request, session
+from flask import Flask, flash, redirect, render_template, request, session, jsonify
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
+import re
 
 from helpers import apology, login_required
 
@@ -32,7 +33,9 @@ def after_request(response):
 def index():
     """Show portfolio of pets the user owns"""
     cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
-    return render_template("index.html", cash=cash)
+    pets = db.execute("SELECT animals.* FROM purchases JOIN animals ON purchases.animal_id = animals.id WHERE purchases.user_id = ?", session["user_id"])
+
+    return render_template("index.html", cash=cash, pets=pets)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -90,19 +93,34 @@ def register():
     """Register user"""
     if request.method == "POST":
         # Ensure username was submitted
+        password = request.form.get("password")
+
         if not request.form.get("username"):
             return apology("Warning: Must provide username", "register.html")
 
         # Ensure password was submitted
-        elif not request.form.get("password"):
+        elif not password:
             return apology("Warning: Must provide password", "register.html")
+
+        elif not (
+            len(password) >= 6
+            and any(char.isdigit() for char in password)
+            and any(char.isalpha() for char in password)
+            and any(char.isupper() for char in password)
+            and not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password)
+        ):
+            return apology(
+                "Warning: Password must be at least 6 characters long, "
+                "include a number, a letter, and a capital letter, and exclude symbols",
+                "register.html"
+            )
 
         # Ensure confirmation was submitted
         elif not request.form.get("confirmation"):
             return apology("Warning: Must confirm password", "register.html")
 
         # Ensure confirmation matches password
-        elif request.form.get("confirmation") != request.form.get("password"):
+        elif request.form.get("confirmation") != password:
             return apology("Warning: Passwords dont match", "register.html")
 
         elif db.execute(
@@ -110,7 +128,7 @@ def register():
         ):
             return apology("Warning: Username taken", "register.html")
 
-        phash = generate_password_hash(request.form.get("password"))
+        phash = generate_password_hash(password)
 
         user = db.execute(
             "INSERT INTO users (username, hash, timestamp) VALUES (?,?,?)",
@@ -130,7 +148,31 @@ def register():
 @login_required
 def shop():
     """Allow user to buy new pets/accessories/pet food"""
-    if request.method == "GET":
+    if request.method == "POST":
+        animal_id = request.form.get("animal_id")
+
+        result = db.execute("SELECT price FROM animals WHERE id = ?", animal_id)[0]
+        
+        if result:
+            animal_price = result["price"]
+            cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
+            if cash >= animal_price:
+                db.execute("INSERT INTO purchases (user_id, animal_id, price) VALUES (?, ?, ?)",
+                        session["user_id"], animal_id, animal_price)
+                
+                db.execute("UPDATE users SET cash = ? WHERE id = ?", cash - animal_price, session["user_id"])
+                return redirect("/")
+            else:
+                flash("Cannot afford pet")
+                return redirect("/shop")
+        else:
+            flash("Invalid pet")
+            return redirect("/shop")
+
+    else:
+        def user_owns_pet(id):
+            return bool(db.execute("SELECT id FROM purchases WHERE user_id = ? AND animal_id = ?", session["user_id"], id))
+        
         categories = [
             {"name": "Goofball"},
             {"name": "Elegant"},
@@ -140,16 +182,59 @@ def shop():
         ]
 
         animals = db.execute("SELECT * FROM animals")
-        return render_template("shop.html", animals=animals, categories=categories)
+        return render_template("shop.html", animals=animals, categories=categories, user_owns_pet=user_owns_pet)
 
 
 @app.route("/sell", methods=["GET", "POST"])
 @login_required
 def sell():
     """Allow user to sell his owned pets and accessories"""
-    if request.method == "GET":
-        return render_template("sell.html")
+    if request.method == "POST":
+        animal_id = request.form.get("animal_id")
 
+        result = db.execute("SELECT animal_id FROM purchases WHERE user_id = ? AND animal_id = ?", session["user_id"], animal_id)
+
+        if result:
+            result = result[0]
+            animal_price = db.execute("SELECT price FROM purchases WHERE user_id = ? AND animal_id = ?", session["user_id"], animal_id)[0]
+
+            if animal_price:
+                cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]
+
+                if cash:
+                    db.execute("UPDATE users SET cash = ? WHERE id = ?", cash["cash"] + animal_price["price"], session["user_id"])
+                    db.execute("DELETE FROM purchases WHERE user_id = ? AND animal_id = ?", session["user_id"], animal_id)
+                    return redirect("/")
+                else:
+                    flash("Error fetching user's cash")
+                    return redirect("/sell")
+            else:
+                flash("Error fetching pet's price")
+                return redirect("/sell")
+        else:
+            flash("Invalid pet")
+            return redirect("/sell")
+        
+    else:
+        pets = db.execute("SELECT animals.* FROM purchases JOIN animals ON purchases.animal_id = animals.id WHERE purchases.user_id = ?", session["user_id"])
+        return render_template("sell.html", pets=pets)
+
+
+@app.route("/get_pet_details/<int:pet_id>")
+@login_required
+def get_pet_details(pet_id):
+    # Retrieve pet details based on the pet_id
+    pet_details = db.execute("SELECT * FROM animals WHERE id = ?", pet_id)[0]
+
+    if pet_details:
+        return jsonify({
+            "image": pet_details["image"],
+            "name": pet_details["name"],
+            "description": pet_details["description"],
+            "price": pet_details["price"]
+        })
+    else:
+        return jsonify(None)
 
 @app.route("/inventory")
 @login_required

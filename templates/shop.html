@@ -17,7 +17,7 @@
     
     <!-- Tab panes -->
     <div class="tab-content text-center py-5">
-        <div class="tab-pane container active" id="pets">
+        <div class="tab-pane container-fluid active" id="pets">
             {% for category in categories %}
                 <div class="{{ category.name|lower }} mb-5">
                     <h2 class="text-center mb-4">{{ category.name }}</h2>
@@ -34,9 +34,18 @@
                                         <ul class="list-group list-group-flush">
                                             <li class="list-group-item text-bg-light">Price: {{ animal['price'] }}</li>
                                         </ul>
-                                        <div class="card-body">
-                                            <a href="#" class="btn btn-outline-light">Buy</a>
-                                        </div>
+                                        {% if user_owns_pet(animal['id']) %}
+                                            <div class="card-body">
+                                                <button class="btn btn-light" disabled>Already Owned</button>
+                                            </div>
+                                        {% else %}
+                                            <div class="card-body">
+                                                <form method="post" action="/shop">
+                                                    <input type="hidden" name="animal_id" value="{{ animal['id'] }}">
+                                                    <button type="submit" class="btn btn-outline-light">Buy</button>
+                                                </form>
+                                            </div>
+                                        {% endif %}                                      
                                     </div>
                                 </div>
                             {% endif %}
@@ -46,7 +55,8 @@
             {% endfor %}
         </div>
 
-        <div class="tab-pane container" id="acc&food">... ruff</div>
+        <div class="tab-pane container" id="acc&food">... ruff
+        </div>
     </div>
 
     <script>

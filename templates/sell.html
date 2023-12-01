@@ -5,5 +5,62 @@
 {% endblock %}
 
 {% block main %}
- <h1>TODO</h1>
+    <div class="container-fluid py-5 text-center">
+        <form action="/sell" method="post">
+            <div class="mb-3">
+                <select class="form-select mx-auto w-auto" name="pet" id="petSelect">
+                    <option disabled selected>Pet</option>
+                    {% for pet in pets %}
+                        <option value="{{ pet['id'] }}">{{ pet["name"] }}</option>
+                        <input type="hidden" name="animal_id" value="{{ pet['id'] }}">
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="petDetails" style="display: none; width: 30%;">
+                <div class="card text-bg-success mb-3">
+                    <img id="petImage" class="card-img-top aspect-ratio-16x9" alt="Pet image">
+                    <div class="card-body">
+                        <h5 class="card-title" id="petName"></h5>
+                        <p class="card-text" id="petDescription"></p>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item text-bg-light" id="petPrice"></li>
+                    </ul>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" type="submit">Sell</button>
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#petSelect").change(function () {
+                var selectedPetId = $(this).val();
+                if (selectedPetId) {
+                    $.ajax({
+                        url: "/get_pet_details/" + selectedPetId,
+                        method: "GET",
+                        success: function (data) {
+                            if (data) {
+                                $("#petDetails").show();
+                                $("#petImage").attr("src", data.image);
+                                $("#petName").text(data.name);
+                                $("#petDescription").text(data.description);
+                                $("#petPrice").text("Price: " + data.price);
+                            } else {
+                                $("#petDetails").hide();
+                            }
+                        },
+                        error: function (error) {
+                            console.error("Error fetching pet details:", error);
+                        }
+                    });
+                } else {
+                    $("#petDetails").hide();
+                }
+            });
+        });
+    </script>
 {% endblock %}
