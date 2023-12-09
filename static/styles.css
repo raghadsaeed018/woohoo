@@ -1,3 +1,15 @@
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('/static/images/bgPaws.jpg') center/cover no-repeat;
+    filter: blur(2px); /* Adjust the blur radius as needed */
+    z-index: -1; /* Ensure it's positioned behind the content */
+}
+
 .width {
     width: 40%; /* Default width for larger screens */
 }
@@ -20,10 +32,44 @@
 }
 
 .navbar {
-    background-color: #ffd480;
-    color: black;
+    background-color: rgba(128, 184, 228, 0.85);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
 }
 
-/* .goofball > h2 {
-    background-color: yellow;
+nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+  
+nav ul li {
+    display: inline-block;
+    padding: 0.25rem;
+}
+  
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+}
+  
+nav ul li a:hover {
+    background-color: #369dff;
+}
+
+.adventurous .card {
+    background-color: #198754;
+    color: white;
+}
+
+.noodle-brain .card {
+    background-color: #fd7e14;
+    color: white;
+}
+
+/* .adventurous h2 {
+    background-color: ;
 } */

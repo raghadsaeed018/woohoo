@@ -6,23 +6,109 @@
 
 {% block main %}
     <div class="py-4 d-flex">
-        <h1 class="badge text-bg-secondary fs-5 ms-auto me-3">{{ cash }}</h1>
+        <button class="btn btn-secondary fs-5 ms-auto me-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-coin my-1" viewBox="0 0 16 16">
+                <path d="M5.5 9.511c.076.954.83 1.697 2.182 1.785V12h.6v-.709c1.4-.098 2.218-.846 2.218-1.932 0-.987-.626-1.496-1.745-1.76l-.473-.112V5.57c.6.068.982.396 1.074.85h1.052c-.076-.919-.864-1.638-2.126-1.716V4h-.6v.719c-1.195.117-2.01.836-2.01 1.853 0 .9.606 1.472 1.613 1.707l.397.098v2.034c-.615-.093-1.022-.43-1.114-.9H5.5zm2.177-2.166c-.59-.137-.91-.416-.91-.836 0-.47.345-.822.915-.925v1.76h-.005zm.692 1.193c.717.166 1.048.435 1.048.91 0 .542-.412.914-1.135.982V8.518z"/>
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11m0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>
+            </svg>
+            {{ cash }}
+        </button>
     </div>
+
     <div class="text-center container-fluid py-4">
         <div class="row row-cols-2 row-cols-md-2 row-cols-lg-4 g-3">
-            {% for pet in pets %}
-                    <div class="col">
-                        <div class="card text-bg-success mb-3">
-                            <img src="{{ pet['image'] }}" class="card-img-top aspect-ratio-16x9" alt="Pet image">
-                            <div class="card-body">
-                                <h5 class="card-title">{{ pet['name'] }}</h5>
-                                <p class="card-text">Mood: {{ pet['description'] }}</p>
+            {% if pets %}
+                {% for pet in pets %}
+                    <div class="{{ pet['category'] }}">
+                        <div class="col">
+                            <div class="card mb-3">
+                                <img src="{{ pet['image'] }}" class="card-img-top aspect-ratio-16x9" alt="Pet image">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ pet['name'] }}</h5>
+                                    <p class="card-text">Mood: {{ pet['description'] }}</p>
+                                    <button type="button" class="btn btn-outline-light" onclick="showPetCard('{{ pet.name }}', '{{ pet.description }}', '{{ pet.image }}', '{{ pet.price }}')">Snuggle</button>
+                                </div>
                             </div>
-                                <button type="submit" class="btn btn-outline-light">Snuggle</button>
-                            </div>                                    
                         </div>
                     </div>
-            {% endfor %}
+                {% endfor %}
+            {% else %}
+                <div class="text-center mx-auto mb-5 mt-5">
+                    <p class="h3 text-body-secondary"><i>You don't own any pets! To buy pets, Go to <a href="/shop">shop</a></i></p>
+                </div>
+            {% endif %}
         </div>
     </div>
+
+    <div id="petCardModal" class="modal fade" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border border-black border-2 rounded">
+                <!-- Card content -->
+                <div class="card text-center mx-auto">
+                    <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <div class="m-2 text-white bg-secondary w-25 rounded d-flex align-items-center justify-content-center">
+                        <div class="position-relative me-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-coin my-1" viewBox="0 0 16 16">
+                                <path d="M5.5 9.511c.076.954.83 1.697 2.182 1.785V12h.6v-.709c1.4-.098 2.218-.846 2.218-1.932 0-.987-.626-1.496-1.745-1.76l-.473-.112V5.57c.6.068.982.396 1.074.85h1.052c-.076-.919-.864-1.638-2.126-1.716V4h-.6v.719c-1.195.117-2.01.836-2.01 1.853 0 .9.606 1.472 1.613 1.707l.397.098v2.034c-.615-.093-1.022-.43-1.114-.9H5.5zm2.177-2.166c-.59-.137-.91-.416-.91-.836 0-.47.345-.822.915-.925v1.76h-.005zm.692 1.193c.717.166 1.048.435 1.048.91 0 .542-.412.914-1.135.982V8.518z"/>
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11m0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>
+                            </svg>
+                        </div>
+                        <div class="position-relative">
+                            <span id="petPrice" class="fs-5">
+                            </span>
+                        </div>
+                    </div>                                                    
+                    <img src="" id="petImage" class="card-img-top aspect-ratio-16x9" alt="Pet image">
+                    <div class="card-body">
+                        <h5 class="card-title" id="petName"></h5>
+                        <p class="card-text">Mood: <span id="petDescription"></span></p>
+                        <!-- Add your buttons here -->
+                        <div class="row justify-content-center">
+                            <div class="col mb-3">
+                                <button type="button" class="btn btn-outline-dark btn-block w-100">Pet</button>
+                            </div>
+                            <div class="col mb-3">
+                                <button type="button" class="btn btn-outline-dark btn-block w-100">Feed</button>
+                            </div>
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="col mb-3">
+                                <button type="button" class="btn btn-outline-dark btn-block w-100">Accessory</button>
+                            </div>
+                            <div class="col mb-3">
+                                <a href="/sell"><button type="button" class="btn btn-outline-dark btn-block w-100">Sell</button></a>
+                            </div>
+                        </div>
+                        <!-- Progress bar for happiness -->
+                        <p class="h3 text-center">Happiness</p>
+                        <div class="progress mt-3">
+                            <div class="progress-bar" role="progressbar" style="width: 50%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showPetCard(name, description, image, price) {
+            // Use the name, description, and image values to populate the modal
+            const petImageSrc = image;
+            const petName = name;
+            const petDescription = description;
+            const petPrice = price;
+    
+            // Set the content of the card modal
+            document.getElementById('petImage').src = petImageSrc;
+            document.getElementById('petName').innerText = petName;
+            document.getElementById('petDescription').innerText = petDescription;
+            document.getElementById('petPrice').innerText = petPrice;
+    
+            // Show the card modal
+            const modal = new bootstrap.Modal(document.getElementById('petCardModal'));
+            modal.show();
+        }
+    </script>     
 {% endblock %}

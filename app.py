@@ -231,7 +231,8 @@ def get_pet_details(pet_id):
             "image": pet_details["image"],
             "name": pet_details["name"],
             "description": pet_details["description"],
-            "price": pet_details["price"]
+            "price": pet_details["price"],
+            "category": pet_details["category"]
         })
     else:
         return jsonify(None)
