@@ -12,8 +12,12 @@
                 <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
                 <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11m0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>
             </svg>
-            {{ cash }}
+            <span id="cashAmount">{{ cash }}</span>
         </button>
+    </div>
+
+    <div class="mx-auto text-center mb-4">
+        <label for="petSelect" class="form-label text-bg-secondary fs-4 snugglez rounded w-50">My Pets</label>
     </div>
 
     <div class="text-center container-fluid py-4">
@@ -22,8 +26,8 @@
                 {% for pet in pets %}
                     <div class="{{ pet['category'] }}">
                         <div class="col">
-                            <div class="card mb-3">
-                                <img src="{{ pet['image'] }}" class="card-img-top aspect-ratio-16x9" alt="Pet image">
+                            <div class="card sizes">
+                                <img src="{{ pet['image'] }}" class="{{ pet['name'] }} card-img-top aspect-ratio-16x9 mx-auto" alt="Pet image">
                                 <div class="card-body">
                                     <h5 class="card-title">{{ pet['name'] }}</h5>
                                     <p class="card-text">Mood: {{ pet['description'] }}</p>
@@ -45,7 +49,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border border-black border-2 rounded">
                 <!-- Card content -->
-                <div class="card text-center mx-auto">
+                <div class="card text-center position-relative">
                     <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
                     <div class="m-2 text-white bg-secondary w-25 rounded d-flex align-items-center justify-content-center">
                         <div class="position-relative me-1">
@@ -55,27 +59,51 @@
                                 <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11m0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>
                             </svg>
                         </div>
-                        <div class="position-relative">
+                        <div>
                             <span id="petPrice" class="fs-5">
                             </span>
                         </div>
                     </div>                                                    
-                    <img src="" id="petImage" class="card-img-top aspect-ratio-16x9" alt="Pet image">
+                    <img src="" id="petImage" class="card-img-top aspect-ratio-16x9 " alt="Pet image">
+                     <!-- Add this container for owned food cards within the modal body -->
+                     <!-- <div class="modal-body">
+                        Container for owned food cards
+                        <div id="foodContainer" class="position-absolute top-0 start-50 translate-middle mx-auto">
+                        </div>
+                    </div>  -->
                     <div class="card-body">
                         <h5 class="card-title" id="petName"></h5>
                         <p class="card-text">Mood: <span id="petDescription"></span></p>
                         <!-- Add your buttons here -->
                         <div class="row justify-content-center">
                             <div class="col mb-3">
-                                <button type="button" class="btn btn-outline-dark btn-block w-100">Pet</button>
+                                <div class="position-relative">
+                                    <button class="btn btn-outline-dark btn-block w-100" onclick="petAction()">Pet</button>
+
+                                    <div class="position-absolute start-50 translate-middle" style="top: -2rem;">
+                                        <span id="petBadge" class="arrow-badge badge bg-success fs-5"></span>
+                                    </div>
+                                </div>
                             </div>
+
                             <div class="col mb-3">
-                                <button type="button" class="btn btn-outline-dark btn-block w-100">Feed</button>
+                                <!-- Update the Feed button with an ID -->
+                                <div class="position-relative">
+                                    <button type="button" id="feedButton" class="btn btn-outline-dark btn-block w-100">Feed</button>
+                                    <div id="notice" class="position-absolute start-50 translate-middle" style="top: -2rem; display: none;">
+                                        <span class="badge bg-dark fs-6">Feeding pets will <br> be available soon!</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="row justify-content-center">
                             <div class="col mb-3">
-                                <button type="button" class="btn btn-outline-dark btn-block w-100">Accessory</button>
+                                <div class="position-relative">
+                                    <button type="button" id="accessoryButton" class="btn btn-outline-dark btn-block w-100">Accessory</button>
+                                    <div id="notice2" class="position-absolute start-50 translate-middle" style="top: -2rem; display: none;">
+                                        <span class="badge bg-dark fs-6">Accessories will be <br> available soon!</span>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col mb-3">
                                 <a href="/sell"><button type="button" class="btn btn-outline-dark btn-block w-100">Sell</button></a>
@@ -90,25 +118,171 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div>   
 
     <script>
+        let isFoodContainerVisible = false;
+
         function showPetCard(name, description, image, price) {
             // Use the name, description, and image values to populate the modal
             const petImageSrc = image;
             const petName = name;
             const petDescription = description;
             const petPrice = price;
-    
+
             // Set the content of the card modal
             document.getElementById('petImage').src = petImageSrc;
             document.getElementById('petName').innerText = petName;
             document.getElementById('petDescription').innerText = petDescription;
             document.getElementById('petPrice').innerText = petPrice;
-    
+
             // Show the card modal
             const modal = new bootstrap.Modal(document.getElementById('petCardModal'));
             modal.show();
         }
-    </script>     
+
+        function petAction() {
+            // Make an AJAX request to the Flask backend to update user's cash
+            $.ajax({
+                url: "/pet_action",
+                method: "POST",
+                success: function (data) {
+                    // Handle success, e.g., update UI to reflect new cash amount
+                    if (data.success) {
+                        // Assuming you have a DOM element with id "cashAmount" to display cash
+                        console.log(data)
+                        $("#cashAmount").text(data.newCashAmount);
+
+                        const coinIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-coin my-1 me-1" viewBox="0 0 16 16">
+                                            <path d="M5.5 9.511c.076.954.83 1.697 2.182 1.785V12h.6v-.709c1.4-.098 2.218-.846 2.218-1.932 0-.987-.626-1.496-1.745-1.76l-.473-.112V5.57c.6.068.982.396 1.074.85h1.052c-.076-.919-.864-1.638-2.126-1.716V4h-.6v.719c-1.195.117-2.01.836-2.01 1.853 0 .9.606 1.472 1.613 1.707l.397.098v2.034c-.615-.093-1.022-.43-1.114-.9H5.5zm2.177-2.166c-.59-.137-.91-.416-.91-.836 0-.47.345-.822.915-.925v1.76h-.005zm.692 1.193c.717.166 1.048.435 1.048.91 0 .542-.412.914-1.135.982V8.518z"/>
+                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                            <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11m0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>
+                                        </svg>`;
+                                        
+                        const petBadge = $("#petBadge");
+                        petBadge.html(coinIcon + "+1").fadeIn(100).delay(500).fadeOut(100);
+                    } else {
+                        console.error("Pet action failed.");
+                    }
+                },
+                error: function (error) {
+                    console.error("Error in pet action:", error);
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            // Initialize the visibility state
+            var isNoticeVisible = false;
+
+            // Set the initial state
+            $("#notice").hide();
+            $("#notice2").hide();
+
+            // Click event handler for the feed button
+            $("#feedButton").click(function () {
+                // Toggle the visibility state
+                isNoticeVisible = !isNoticeVisible;
+
+                // Show or hide the notice based on the visibility state
+                if (isNoticeVisible) {
+                    $("#notice").show();
+                } else {
+                    $("#notice").hide();
+                }
+            });
+
+            $("#accessoryButton").click(function () {
+                // Toggle the visibility state
+                isNoticeVisible = !isNoticeVisible;
+
+                // Show or hide the notice based on the visibility state
+                if (isNoticeVisible) {
+                    $("#notice2").show();
+                } else {
+                    $("#notice2").hide();
+                }
+            });
+
+            // Event handler for modal close
+            $('#petCardModal').on('hidden.bs.modal', function () {
+                // Hide the notice and reset the visibility state
+                $("#notice").hide();
+                $("#notice2").hide();
+                isNoticeVisible = false;
+            });
+        });
+
+    //     $(document).ready(function () {
+    //         $("#feedButton").click(function () {
+    //             // Toggle the visibility of the food container
+    //             isFoodContainerVisible = !isFoodContainerVisible;
+
+    //             // Call the function to display owned food
+    //             displayOwnedFood();
+    //         });
+
+    //         // Function to display owned food
+    //         function displayOwnedFood() {
+    //             // Make an AJAX request to the Flask backend
+    //             $.ajax({
+    //                 url: "/get_owned_food",
+    //                 method: "GET",
+    //                 success: function (data) {
+    //                     // Check if there is owned food
+    //                     if (data && data.images.length > 0) {
+    //                         // Clear previous content
+    //                         $("#foodContainer").empty();
+
+    //                         // Loop through the data and create small cards
+    //                         for (let i = 0; i < data.images.length; i++) {
+    //                             renderFoodCard(data.images[i], data.names[i], data.count[i]);
+    //                         }
+
+    //                         // Show or hide the container based on the flag
+    //                         if (isFoodContainerVisible) {
+    //                             $("#foodContainer").show();
+    //                         } else {
+    //                             $("#foodContainer").empty().hide();
+    //                         }
+
+    //                     } else {
+    //                         // Handle the case when there is no owned food
+    //                         $("#foodContainer").empty().append('<p>No owned food.</p>');
+    //                     }
+    //                 },
+    //                 error: function (error) {
+    //                     console.error("Error fetching owned food:", error);
+    //                 }
+    //             });
+    //         }
+
+    //         function renderFoodCard(image, name, count) {
+    //             // Create and append the food card
+    //             const foodCard = `<div class="col-lg-6 col-md-6 col-sm-12 col-12">
+    //                                 <div class="card mb-3 mt-3 text-center border border-black border-2 rounded">
+    //                                     <img class="card-img-top aspect-ratio-16x9 img-fluid" src="${image}" alt="Food image">
+    //                                     <span class="badge text-bg-danger position-absolute top-0 start-0 m-2 fs-6"></span>
+    //                                     <div class="card-body">
+    //                                         <h5 class="card-title">${name}</h5>
+    //                                     </div>
+    //                                 </div>
+    //                             </div>`;
+    //             $("#foodContainer").append(foodCard);
+
+    //             if (count > 1) {
+    //                 $("#foodContainer .card:last-child .badge").text(count + "x");
+    //             }
+    //         }
+
+
+
+    //         // Listen for the modal hidden event
+    //         $('#petCardModal').on('hidden.bs.modal', function () {
+    //             // Clear the content of the food container
+    //             $("#foodContainer").empty();
+    //             isFoodContainerVisible = false;
+    //         });
+    //     });
+    </script>   
 {% endblock %}

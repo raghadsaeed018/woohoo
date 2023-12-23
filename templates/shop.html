@@ -16,48 +16,93 @@
     </ul>
     
     <!-- Tab panes -->
-    <div class="tab-content text-center py-5">
+    <div class="tab-content text-center py-3">
+        <div class="d-flex">
+            <button class="btn btn-secondary fs-5 ms-auto me-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-coin my-1" viewBox="0 0 16 16">
+                    <path d="M5.5 9.511c.076.954.83 1.697 2.182 1.785V12h.6v-.709c1.4-.098 2.218-.846 2.218-1.932 0-.987-.626-1.496-1.745-1.76l-.473-.112V5.57c.6.068.982.396 1.074.85h1.052c-.076-.919-.864-1.638-2.126-1.716V4h-.6v.719c-1.195.117-2.01.836-2.01 1.853 0 .9.606 1.472 1.613 1.707l.397.098v2.034c-.615-.093-1.022-.43-1.114-.9H5.5zm2.177-2.166c-.59-.137-.91-.416-.91-.836 0-.47.345-.822.915-.925v1.76h-.005zm.692 1.193c.717.166 1.048.435 1.048.91 0 .542-.412.914-1.135.982V8.518z"/>
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                    <path d="M8 13.5a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11m0 .5A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/>
+                </svg>
+                {{ cash }}
+            </button>
+        </div>
         <div class="tab-pane container-fluid active" id="pets">
             {% for category in categories %}
-                <div class="{{ category.name|lower }} mb-5">
-                    <h2 class="text-center mb-4">{{ category.name }}</h2>
-                    <div class="row row-cols-2 row-cols-md-2 row-cols-lg-4 g-3">
-                        {% for animal in animals %}
-                            {% if animal["category"] == category.name|lower %}
-                                <div class="col">
-                                    <div class="card mb-3">
-                                        <img src="{{ animal['image'] }}" class="card-img-top aspect-ratio-16x9" alt="Pet image">
-                                        <div class="card-body">
-                                            <h5 class="card-title">{{ animal['name'] }}</h5>
-                                            <p class="card-text">{{ animal['description'] }}</p>
+                {% if category.name|lower in ["goofball", "elegant", "adventurous", "mischievous", "noodle-brain"] %}
+                    <div class="{{ category.name|lower }} mb-5">
+                        <h2 class="text-center mb-4">{{ category.name }}</h2>
+                        <div class="row row-cols-2 row-cols-md-2 row-cols-lg-4 g-3">
+                            {% for animal in animals %}
+                                {% if animal["category"] == category.name|lower %}
+                                    <div class="col">
+                                        <div class="card sizes mb-3">
+                                            <img src="{{ animal['image'] }}" class="{{ animal['name'] }} card-img-top aspect-ratio-16x9 mx-auto" alt="Pet image">
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ animal['name'] }}</h5>
+                                                <p class="card-text">{{ animal['description'] }}</p>
+                                            </div>
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item text-bg-light">Price: {{ animal['price'] }}</li>
+                                            </ul>
+                                            {% if user_owns_pet(animal['id']) %}
+                                                <div class="card-body">
+                                                    <button class="btn btn-light" disabled>Already Owned</button>
+                                                </div>
+                                            {% else %}
+                                                <div class="card-body">
+                                                    <form method="post" action="/shop">
+                                                        <input type="hidden" name="animal_id" value="{{ animal['id'] }}">
+                                                        <button type="submit" class="btn btn-outline-light">Buy</button>
+                                                    </form>
+                                                </div>
+                                            {% endif %}                                      
                                         </div>
-                                        <ul class="list-group list-group-flush">
-                                            <li class="list-group-item text-bg-light">Price: {{ animal['price'] }}</li>
-                                        </ul>
-                                        {% if user_owns_pet(animal['id']) %}
-                                            <div class="card-body">
-                                                <button class="btn btn-light" disabled>Already Owned</button>
-                                            </div>
-                                        {% else %}
-                                            <div class="card-body">
-                                                <form method="post" action="/shop">
-                                                    <input type="hidden" name="animal_id" value="{{ animal['id'] }}">
-                                                    <button type="submit" class="btn btn-outline-light">Buy</button>
-                                                </form>
-                                            </div>
-                                        {% endif %}                                      
                                     </div>
-                                </div>
-                            {% endif %}
-                        {% endfor %}
+                                {% endif %}
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
+                {% endif %}
             {% endfor %}
         </div>
 
-        <div class="tab-pane container" id="acc&food">... ruff
+        <div class="tab-pane container-fluid" id="acc&food">
+            {% for category in categories %}
+                {% if category.name|lower in ['food', 'accessory'] %}
+                    <div class="{{ category.name|lower }} mb-5">
+                        <h2 class="text-center mb-4">{{ category.name }}</h2>
+                        <div class="row row-cols-2 row-cols-md-2 row-cols-lg-5 g-3">
+                            {% for item in animals %}
+                                {% if item["category"] == category.name|lower %}
+                                    <div class="col">
+                                        <div class="card mb-3">
+                                            <img src="{{ item['image'] }}" class="card-img-top aspect-ratio-16x9" alt="Item image">
+                                            <div class="card-body">
+                                                <h5 class="card-title">{{ item['name'] }}</h5>
+                                            </div>
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item text-bg-light">Price: {{ item['price'] }}</li>
+                                            </ul>
+                                            <div class="card-body">
+                                                <form method="post" action="/shop">
+                                                    <input type="hidden" name="animal_id" value="{{ item['id'] }}">
+                                                    <button type="submit" class="btn btn-outline-dark">Buy</button>
+                                                </form>
+                                            </div>                                      
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            <div class="alert alert-danger width text-center mx-auto fs-5" role="alert">
+                Accessories are not yet available~~~ &gt;_&lt;
+            </div>
         </div>
-    </div>
 
     <script>
         $(document).ready(function () {

@@ -32,7 +32,7 @@ body::before {
 }
 
 .navbar {
-    background-color: rgba(128, 184, 228, 0.85);
+    background-color: rgba(103, 176, 231, 0.85);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     display: flex;
     justify-content: space-between;
@@ -60,16 +60,179 @@ nav ul li a:hover {
     background-color: #369dff;
 }
 
+.elegant h2 {
+    background-color: #8e01aabb;
+    color: white;
+    width: 50%;
+    margin: auto;
+    padding: 7px;
+    border-radius: 25px;
+    font-family: 'brush script mt', cursive;
+}
+
+.goofball h2 {
+    background-color: #006effbb;
+    color: white;
+    width: 50%;
+    margin: auto;
+    padding: 7px;
+    border-radius: 25px;
+    font-family: 'brush script mt', cursive;
+}
+
+.adventurous h2 {
+    background-color: #249236bb;
+    color: white;
+    width: 50%;
+    margin: auto;
+    padding: 7px;
+    border-radius: 25px;
+    font-family: 'brush script mt', cursive;
+}
+
+.noodle-brain h2 {
+    background-color: #ffa600bb;
+    color: white;
+    width: 50%;
+    margin: auto;
+    padding: 7px;
+    border-radius: 25px;
+    font-family: 'brush script mt', cursive;
+}
+
+.mischievous h2 {
+    background-color: #d60000bb;
+    color: white;
+    width: 50%;
+    margin: auto;
+    padding: 7px;
+    border-radius: 25px;
+    font-family: 'brush script mt', cursive;
+}
+
 .adventurous .card {
-    background-color: #198754;
+    background-color: #249236;
     color: white;
 }
 
 .noodle-brain .card {
-    background-color: #fd7e14;
+    background-color: #ffc400;
+    color: black;
+}
+
+.mischievous .card {
+    background-color: #d60000;
     color: white;
 }
 
-/* .adventurous h2 {
-    background-color: ;
-} */
+.elegant .card {
+    background-color: #8e01aa;
+    color: white;
+}
+
+.goofball .card {
+    background-color: rgb(0, 110, 255);
+    color: white;
+}
+
+.food .card {
+    background-color: rgb(179, 179, 179);
+}
+
+.food h2 {
+    background-color: #747474bb;
+    color: white;
+    width: 50%;
+    margin: auto;
+    padding: 7px;
+    border-radius: 25px;
+    font-family: 'brush script mt', cursive;
+}
+
+.accessory h2 {
+    background-color: #ff4848bb;
+    color: white;
+    width: 50%;
+    margin: auto;
+    padding: 7px;
+    border-radius: 25px;
+    font-family: 'brush script mt', cursive;
+}
+
+.arrow-badge {
+    position: relative;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: inline-block; /* Make sure it behaves as an inline element */
+}
+  
+.arrow-badge::after {
+    content: '';
+    position: absolute;
+    bottom: -19px; /* Adjust this value to control the distance between badge and arrow */
+    left: 50%;
+    margin-left: -10px; /* Half of the arrow's width */
+    border-width: 10px;
+    border-style: solid;
+    border-color: #198754 transparent transparent transparent;
+} 
+
+/* Media query for large screens */
+@media (min-width: 1025px) {
+    .sizes {
+        max-height: 460px;
+        max-width: 350px;
+    }
+
+    .sizes img {
+        max-width: 40vh;
+        max-height: 35vh;
+    }
+
+    .sizes .Blob {
+        width: 33.5vh;
+        height: 33.5vh;
+    }
+
+    .sizes .Mommy {
+        width: 33.5vh;
+        height: 33.5vh;
+    }
+
+    .sizes .Midnight {
+        width: 33.5vh;
+        height: 33.5vh;
+    }
+}
+
+/* Media query for small screens */
+@media (max-width: 576px) {
+    .sizes {
+        max-height: 380px;
+    }
+
+    .sizes img {
+        max-width: 25vh;
+        max-height: 20vh;
+    }
+
+    .sizes .Blob {
+        width: 17vh;
+        height: 17vh;
+    }
+
+    .sizes .Mommy {
+        width: 17vh;
+        height: 17vh;
+    }
+
+    .sizes .Ugabaluga {
+        width: 17vh;
+        height: 17vh;
+    }
+
+    .sizes .Midnight {
+        width: 17vh;
+        height: 17vh;
+    }
+}

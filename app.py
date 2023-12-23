@@ -33,10 +33,66 @@ def after_request(response):
 def index():
     """Show portfolio of pets the user owns"""
     cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
-    pets = db.execute("SELECT animals.* FROM purchases JOIN animals ON purchases.animal_id = animals.id WHERE purchases.user_id = ?", session["user_id"])
+    pets = db.execute("""
+        SELECT animals.*
+        FROM purchases
+        JOIN animals ON purchases.animal_id = animals.id
+        WHERE purchases.user_id = ? AND animals.category NOT IN (
+            SELECT category FROM animals WHERE category IN ('food', 'accessory')
+        )
+    """, session["user_id"])
+
 
     return render_template("index.html", cash=cash, pets=pets)
 
+@app.route("/get_owned_food")
+@login_required
+def get_owned_food():
+    # Retrieve pet details based on the pet_id
+    owned_food = db.execute("""
+        SELECT animals.*, COUNT(*) as count
+        FROM purchases
+        JOIN animals ON purchases.animal_id = animals.id
+        WHERE purchases.user_id = ? AND animals.category = (
+            SELECT category FROM animals WHERE category = 'food'
+        )
+        GROUP BY animals.id
+    """, session["user_id"])
+
+    if owned_food:
+        # Extract images and names from the list of dictionaries
+        images = [food["image"] for food in owned_food]
+        names = [food["name"] for food in owned_food]
+        count = [food["count"] for food in owned_food]
+
+        return jsonify({
+            "images": images,
+            "names": names,
+            "count": count
+        })
+    else:
+        return jsonify(None)
+
+@app.route("/pet_action", methods=["POST"])
+def pet_action():
+    if session["user_id"]:
+        # Update the user's cash (add 1 coin)
+        result = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])
+
+        if result:
+            cash = result[0]["cash"]
+            db.execute("UPDATE users SET cash = ? WHERE id = ?", cash + 1, session["user_id"])
+
+            # Query the database again to get the updated cash value
+            updated_cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
+
+            # Return the new cash amount in the response
+            return jsonify({"success": True, "newCashAmount": updated_cash})
+        else:
+            return apology("Error fetching user cash data")
+
+    # Return failure if the user is not found
+    return jsonify({"success": False})
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -174,15 +230,18 @@ def shop():
             return bool(db.execute("SELECT id FROM purchases WHERE user_id = ? AND animal_id = ?", session["user_id"], id))
         
         categories = [
-            {"name": "Goofball"},
             {"name": "Elegant"},
+            {"name": "Goofball"},
             {"name": "Adventurous"},
+            {"name": "Noodle-brain"},
             {"name": "Mischievous"},
-            {"name": "Noodle-brain"}
+            {"name": "Food"},
+            {"name": "Accessory"}
         ]
 
-        animals = db.execute("SELECT * FROM animals")
-        return render_template("shop.html", animals=animals, categories=categories, user_owns_pet=user_owns_pet)
+        cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
+        animals = db.execute("SELECT * FROM animals ORDER BY price")
+        return render_template("shop.html", animals=animals, categories=categories, user_owns_pet=user_owns_pet, cash=cash)
 
 
 @app.route("/sell", methods=["GET", "POST"])
@@ -216,8 +275,16 @@ def sell():
             return redirect("/sell")
         
     else:
-        pets = db.execute("SELECT animals.* FROM purchases JOIN animals ON purchases.animal_id = animals.id WHERE purchases.user_id = ?", session["user_id"])
-        return render_template("sell.html", pets=pets)
+        cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
+        pets = db.execute("""
+            SELECT animals.*
+            FROM purchases
+            JOIN animals ON purchases.animal_id = animals.id
+            WHERE purchases.user_id = ? AND animals.category NOT IN (
+                SELECT category FROM animals WHERE category IN ('food', 'accessory')
+            )
+        """, session["user_id"])
+        return render_template("sell.html", pets=pets, cash=cash)
 
 
 @app.route("/get_pet_details/<int:pet_id>")
@@ -241,7 +308,18 @@ def get_pet_details(pet_id):
 @login_required
 def inventory():
     """Display accessories/pet food the user owns"""
-    return render_template("inventory.html")
+    cash = db.execute("SELECT cash FROM users WHERE id = ?", session["user_id"])[0]["cash"]
+    items = db.execute("""
+        SELECT animals.*, COUNT(*) as count
+        FROM purchases
+        JOIN animals ON purchases.animal_id = animals.id
+        WHERE purchases.user_id = ? AND animals.category IN (
+            SELECT category FROM animals WHERE category IN ('food', 'accessory')
+        )
+        GROUP BY animals.id
+    """, session["user_id"])
+
+    return render_template("inventory.html", cash=cash, items=items)
 
 
 if __name__ == '__main__':
